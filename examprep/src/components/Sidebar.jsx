@@ -14,6 +14,7 @@ export default function Sidebar() {
         { name: 'Home', href: '/dashboard', icon: '🏠' },
         { name: 'Practice Tests', href: '/exams', icon: '📝' },
         { name: 'Previous Year Papers', href: '/previous-year-papers', icon: '📚' },
+        { name: 'Mock Tests', href: '/mock-tests', icon: '📝' },
     ];
 
     return (

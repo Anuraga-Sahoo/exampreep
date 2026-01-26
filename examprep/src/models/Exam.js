@@ -28,7 +28,7 @@ const ExamSchema = new mongoose.Schema({
     }],
     mockExamIds: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Quiz'
+        ref: 'MockTest'
     }],
     createdAt: {
         type: Date,

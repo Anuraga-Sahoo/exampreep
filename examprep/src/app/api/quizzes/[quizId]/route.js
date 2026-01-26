@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from "@/lib/db";
 import Quiz from "@/models/Quiz";
 import PreviousYearPaper from "@/models/PreviousYearPaper";
+import MockTest from "@/models/MockTest";
 
 export async function GET(request, { params }) {
     try {
@@ -13,6 +14,11 @@ export async function GET(request, { params }) {
         if (!test) {
             // If not found in Quiz, try PreviousYearPaper
             test = await PreviousYearPaper.findById(quizId);
+        }
+
+        if (!test) {
+            // If not found in PreviousYearPaper, try MockTest
+            test = await MockTest.findById(quizId);
         }
 
         if (!test) {
