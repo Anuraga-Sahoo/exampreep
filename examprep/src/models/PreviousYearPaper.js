@@ -8,7 +8,6 @@ const OptionSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    publicId: String, // For Cloudinary or similar
     aiTags: [String],
 });
 
@@ -25,7 +24,6 @@ const QuestionSchema = new mongoose.Schema({
         default: 0,
     },
     explanation: String,
-    publicId: String,
     aiTags: [String],
     options: [OptionSchema],
 });
@@ -36,33 +34,41 @@ const SectionSchema = new mongoose.Schema({
     questions: [QuestionSchema],
 });
 
-const QuizSchema = new mongoose.Schema({
+const PreviousYearPaperSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
     },
     testType: {
         type: String,
-        default: "Mock",
+        default: "Previous Year",
     },
+    classId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+    },
+    subjectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+    },
+    chapterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+    },
+    associatedExamId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Exam', // Links back to Exam
+    },
+    associatedExamName: String,
+    tags: [String],
     timerMinutes: {
         type: Number,
         default: 60,
     },
-    associatedExamId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Exam', // Assuming this links back to the Exam model
-    },
-    associatedExamName: String,
-    description: String,
     sections: [SectionSchema],
     status: {
         type: String,
         default: "Draft",
-    },
-    premium: {
-        type: Boolean,
-        default: false
     },
     createdAt: {
         type: Date,
@@ -72,11 +78,11 @@ const QuizSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     }
-});
+}, { collection: 'previousYearTests' }); // Explicitly force collection name if needed, assuming likely camelCase or plural
 
-// Force recompilation in dev mode to pick up schema changes
-if (mongoose.models.Quiz) {
-    delete mongoose.models.Quiz;
+// Force recompilation
+if (mongoose.models.PreviousYearPaper) {
+    delete mongoose.models.PreviousYearPaper;
 }
 
-export default mongoose.model('Quiz', QuizSchema);
+export default mongoose.model('PreviousYearPaper', PreviousYearPaperSchema);

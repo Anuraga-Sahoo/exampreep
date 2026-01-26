@@ -22,10 +22,23 @@ const ExamSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz'
     }],
+    previousYearExamsIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PreviousYearPaper'
+    }],
+    mockExamIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Quiz'
+    }],
     createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-export default mongoose.models.Exam || mongoose.model('Exam', ExamSchema);
+// Force recompilation in dev mode to pick up schema changes
+if (mongoose.models.Exam) {
+    delete mongoose.models.Exam;
+}
+
+export default mongoose.model('Exam', ExamSchema);

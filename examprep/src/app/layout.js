@@ -16,10 +16,11 @@ export const metadata = {
   description: "Mock tests and PYQs for NEET and Government Exams",
 };
 
+import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import AuthProvider from "@/components/AuthProvider";
 
-// ... metadata ...
+// ... imports
 
 export default function RootLayout({ children }) {
   return (
@@ -28,10 +29,15 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-gray-50 dark:bg-black`}
       >
         <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex flex-1 w-full max-w-[1920px] mx-auto">
+              <Sidebar />
+              <main className="flex-1 w-full">
+                {children}
+              </main>
+            </div>
+          </div>
         </AuthProvider>
       </body>
     </html>
