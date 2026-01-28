@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FaClipboardList, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen } from 'react-icons/fa';
 
 export default function MockTestsPage() {
     const router = useRouter();
@@ -113,7 +114,7 @@ export default function MockTestsPage() {
                                         </div>
                                         <div className="flex justify-between items-center text-sm text-gray-500">
                                             <span>View Tests</span>
-                                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                            <span className="group-hover:translate-x-1 transition-transform"><FaArrowRight /></span>
                                         </div>
                                     </div>
                                 ))
@@ -130,7 +131,7 @@ export default function MockTestsPage() {
                                 onClick={handleBackToGallery}
                                 className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors"
                             >
-                                ← Back to Exams
+                                <FaArrowLeft /> Back to Exams
                             </button>
 
                             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-8">
@@ -158,7 +159,7 @@ export default function MockTestsPage() {
                                                         {test.testType || "Mock"}
                                                     </span>
                                                     <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                        ⏱ {test.timerMinutes || 60} min
+                                                        <FaClock className="inline mb-0.5" /> {test.timerMinutes || 60} min
                                                     </span>
                                                 </div>
                                                 <h3 className="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200 line-clamp-2">
@@ -175,7 +176,7 @@ export default function MockTestsPage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-16 text-gray-400 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">
-                                        <div className="text-5xl mb-4">📝</div>
+                                        <div className="text-5xl mb-4 flex justify-center"><FaClipboardList className="opacity-20" /></div>
                                         <p className="text-lg">No mock tests available yet.</p>
                                     </div>
                                 )}

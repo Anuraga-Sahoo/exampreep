@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Timer from '@/components/Timer';
+import { FaClipboardList, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen, FaList, FaTimes } from 'react-icons/fa';
 import QuestionViewer from '@/components/QuestionViewer';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -19,6 +20,8 @@ export default function TestPage() {
     const [answers, setAnswers] = useState({});
     const [markedForReview, setMarkedForReview] = useState(new Set());
     const [loading, setLoading] = useState(true);
+
+    const [showPalette, setShowPalette] = useState(false);
 
     // Derived state for current section
     const currentSectionId = useMemo(() => {
@@ -212,18 +215,26 @@ export default function TestPage() {
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 dark:bg-black">
             {/* Top Header: Title, Timer, Submit */}
-            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-3 flex justify-between items-center shadow-sm z-20">
-                <div>
-                    <h1 className="font-bold text-lg">{quiz.title}</h1>
-                    <span className="text-sm text-gray-500">{quiz.associatedExamName || quiz.testType}</span>
+            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-between items-center shadow-sm z-30 relative">
+                <div className="flex items-center gap-3">
+                    <button
+                        className="lg:hidden text-gray-600 dark:text-gray-300 p-1"
+                        onClick={() => setShowPalette(!showPalette)}
+                    >
+                        {showPalette ? <FaTimes size={20} /> : <FaList size={20} />}
+                    </button>
+                    <div>
+                        <h1 className="font-bold text-sm sm:text-lg line-clamp-1">{quiz.title}</h1>
+                        <span className="text-xs text-gray-500 hidden sm:inline">{quiz.associatedExamName || quiz.testType}</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                     <Timer durationMinutes={quiz.timerMinutes || 60} onTimeUp={handleSubmit} />
                     <button
                         onClick={handleSubmit}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold transition-colors"
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 sm:px-6 sm:py-2 rounded-lg text-xs sm:text-base font-bold transition-colors whitespace-nowrap"
                     >
-                        Submit Test
+                        Submit <span className="hidden sm:inline">Test</span>
                     </button>
                 </div>
             </header>
@@ -270,39 +281,39 @@ export default function TestPage() {
                             />
 
                             {/* Navigation Bar */}
-                            <div className="flex justify-between items-center mt-6 py-4 border-t border-gray-100 dark:border-gray-800">
-                                <div className="flex gap-2">
+                            <div className="flex flex-col-reverse sm:flex-row justify-between items-center mt-6 py-4 border-t border-gray-100 dark:border-gray-800 gap-4 sm:gap-0">
+                                <div className="flex gap-2 w-full sm:w-auto">
                                     <button
                                         disabled={currentQuestionIndex === 0}
                                         onClick={handlePrevious}
-                                        className="px-6 py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium"
+                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium text-sm sm:text-base"
                                     >
                                         Previous
                                     </button>
                                     <button
                                         onClick={handleClearResponse}
-                                        className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium text-sm"
+                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium text-sm sm:text-base truncate"
                                         title="Clear selected option"
                                     >
-                                        Clear Response
+                                        Clear
                                     </button>
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                                     <button
-                                        className="px-4 py-2.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 font-medium"
+                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 font-medium text-sm sm:text-base truncate"
                                         onClick={() => {
                                             toggleMarkReview();
                                             handleNext();
                                         }}
                                     >
-                                        Mark for Review & Next
+                                        Mark & Next
                                     </button>
                                     <button
-                                        className="px-8 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 dark:shadow-none"
+                                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 dark:shadow-none text-sm sm:text-base whitespace-nowrap"
                                         onClick={handleNext}
                                     >
-                                        {currentQuestionIndex === flattenedQuestions.length - 1 ? 'Finish Test' : 'Save & Next'}
+                                        {currentQuestionIndex === flattenedQuestions.length - 1 ? 'Finish' : 'Save & Next'}
                                     </button>
                                 </div>
                             </div>
@@ -313,10 +324,19 @@ export default function TestPage() {
                 </main>
 
                 {/* Question Palette (Sideboard) */}
-                <aside className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex flex-col hidden lg:flex">
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-                        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">Question Palette</h3>
+                <aside className={`
+                    fixed inset-0 top-[60px] z-20 bg-white dark:bg-gray-900 transform transition-transform duration-300 ease-in-out
+                    lg:static lg:transform-none lg:w-80 lg:border-l lg:border-gray-200 lg:dark:border-gray-800 lg:flex lg:flex-col
+                    ${showPalette ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+                `}>
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
+                        <h3 className="font-bold text-gray-800 dark:text-gray-200">Question Palette</h3>
+                        <button className="lg:hidden text-gray-500" onClick={() => setShowPalette(false)}>
+                            <FaTimes />
+                        </button>
+                    </div>
 
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                         {/* Status Counts Summary */}
                         <div className="grid grid-cols-2 gap-3 mb-4">
                             <div className="flex items-center gap-2">
@@ -337,7 +357,7 @@ export default function TestPage() {
                             </div>
                         </div>
 
-                        <hr className="border-gray-200 dark:border-gray-700 mb-4" />
+                        <hr className="border-gray-200 dark:border-gray-700" />
                     </div>
 
                     <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
@@ -373,7 +393,10 @@ export default function TestPage() {
                                             return (
                                                 <button
                                                     key={rawIdx}
-                                                    onClick={() => setCurrentQuestionIndex(rawIdx)}
+                                                    onClick={() => {
+                                                        setCurrentQuestionIndex(rawIdx);
+                                                        setShowPalette(false); // Close on mobile on select
+                                                    }}
                                                     className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm transition-all shadow-sm ${bgClass}`}
                                                     title={`Question ${rawIdx + 1}`}
                                                 >

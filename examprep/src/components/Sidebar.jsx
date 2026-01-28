@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
+import { FaHome, FaPencilAlt, FaBook, FaClipboardList } from 'react-icons/fa';
+
 export default function Sidebar() {
     const { data: session } = useSession();
     const pathname = usePathname();
@@ -11,10 +13,10 @@ export default function Sidebar() {
     if (!session || pathname?.startsWith('/test/')) return null;
 
     const links = [
-        { name: 'Home', href: '/dashboard', icon: '🏠' },
-        { name: 'Practice Tests', href: '/exams', icon: '📝' },
-        { name: 'Previous Year Papers', href: '/previous-year-papers', icon: '📚' },
-        { name: 'Mock Tests', href: '/mock-tests', icon: '📝' },
+        { name: 'Home', href: '/dashboard', icon: <FaHome /> },
+        { name: 'Practice Tests', href: '/exams', icon: <FaPencilAlt /> },
+        { name: 'Previous Year Papers', href: '/previous-year-papers', icon: <FaBook /> },
+        { name: 'Mock Tests', href: '/mock-tests', icon: <FaClipboardList /> },
     ];
 
     return (
