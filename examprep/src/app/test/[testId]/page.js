@@ -23,6 +23,11 @@ export default function TestPage() {
 
     const [showPalette, setShowPalette] = useState(false);
 
+    const [isTestStarted, setIsTestStarted] = useState(false);
+    const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
+    const [showLastQuestionMarkedModal, setShowLastQuestionMarkedModal] = useState(false);
+    const [visitedQuestions, setVisitedQuestions] = useState(new Set([0])); // Start with first question visited
+
     // Derived state for current section
     const currentSectionId = useMemo(() => {
         if (!flattenedQuestions[currentQuestionIndex]) return null;
@@ -31,61 +36,46 @@ export default function TestPage() {
 
     // Calculate Status Counts
     const statusCounts = useMemo(() => {
-        let answered = 0;
-        let marked = 0;
-        let notVisited = 0;
-        // let markedAndAnswered = 0; // If you want to track this separately
-
-        flattenedQuestions.forEach((_, idx) => {
-            const isAnswered = answers[idx] !== undefined;
-            const isMarked = markedForReview.has(idx);
-            // Simple Logic: 
-            // Answered = Has Answer
-            // Marked = Marked (regardless of answer)
-            // Not Visited = Neither
-
-            if (isAnswered) answered++;
-            if (isMarked) marked++;
-            if (!isAnswered && !isMarked) {
-                // Technically "Not Visited" usually implies "Not Seen". 
-                // Here we just count it as "Not Attempted/Marked" for simplicity or use a visited set.
-                // For now, let's treat "Not Visited" as "Rest"
-            }
-        });
 
         // Exact count based on palette logic:
-        // Palette Legend: Answered (Green), Marked (Yellow), Not Visited (Grey)
-        // We can just count keys.
         const ansCount = Object.keys(answers).length;
         const markCount = markedForReview.size;
+        const visitedCount = visitedQuestions.size;
         const total = flattenedQuestions.length;
-        const notVisitedCount = total - ansCount - markCount; // Rough approximation (overlap exists) or just Total - (Answered U Marked)
 
-        // Better:
-        // Answered: count of answers indices
-        // Marked: count of marked indices
-        // Not Visited: Total - visited (if tracking) or Total - Answered - Marked (if we assume exclusive, which they arent)
+        // Not Visited: Total - Visited count
+        const notVisited = total - visitedCount;
 
-        // Let's use simple exclusive counts for display if that's what user expects, or just raw counts.
-        // User asked: "how many questions user answered and how many questions user marked and how many questions user not visited"
+        // Not Answered: Visited but NO answer and NOT marked (if we treat Marked as separate cat).
+        // OR adhering to typical palette:
+        // Red (Not Answered) = Visited - Answered - Marked (exclusive? depends).
+        // Usually:
+        // Answered (Green)
+        // Marked (Purple)
+        // Not Answered (Red) -> Visited & !Answered & !Marked
+        // Not Visited (Grey) -> !Visited
 
-        // Let's calculate exactly based on unique states if possible, or just raw totals.
-        // Usually: 
-        // 1. Answered 
-        // 2. Not Answered 
-        // 3. Not Visited
-        // 4. Marked
-        // 5. Marked & Answered
+        // Let's count properly:
+        // User requested override: "not answered count means from the total question how many questions user not answered"
+        // This likely means Total - Answered (regardless of visited status)
+        const notAnswered = total - ansCount;
 
         return {
             answered: ansCount,
             marked: markCount,
-            notVisited: Math.max(0, total - ansCount - (markCount - 0)) // This math is tricky without explicit visited state.
-            // Let's stick to raw set sizes for now as requested.
+            notAnswered: notAnswered,
+            notVisited: notVisited
         };
-    }, [answers, markedForReview, flattenedQuestions]);
+    }, [answers, markedForReview, flattenedQuestions, visitedQuestions]);
 
-    const notVisitedCount = flattenedQuestions.length - Object.keys(answers).length; // Simple approach: Total - Answered = Not Answered/Visited
+    const { answered: answeredCount, marked: markedCount, notAnswered: notAnsweredCount, notVisited: notVisitedCount } = statusCounts;
+
+    // Track visits
+    useEffect(() => {
+        if (!visitedQuestions.has(currentQuestionIndex)) {
+            setVisitedQuestions(prev => new Set(prev).add(currentQuestionIndex));
+        }
+    }, [currentQuestionIndex, visitedQuestions]);
 
     useEffect(() => {
         if (!testId) return;
@@ -169,16 +159,79 @@ export default function TestPage() {
         });
     };
 
-    const handleSubmit = () => {
+    const executeSubmit = async () => {
+        setShowSubmitConfirmation(false); // Close modal if open
+        setLoading(true); // Show loading state on submit
+
+        // Calculate Score locally for immediate feedback (and sending to DB)
+        // Note: For now we assume simple 1-point per question or just counts.
+        // We need 'correctAnswer' to calculate score. 
+        // IF correct answers are not in 'flattenedQuestions', we rely on backend or just store '0' for now if validation is server-side.
+        // CHECK: Do we have correct answers in `flattenedQuestions`? 
+        // Based on previous contexts, likely yes or we need to rely on 'quiz' data.
+
+        // Let's assume we can calculate it or just send 0 if we can't.
+        // Actually, let's look at `flattenedQuestions`. 
+        // If `correctAnswer` is present in question object, we proceed.
+
+        let correctCount = 0;
+        flattenedQuestions.forEach((q, idx) => {
+            const selectedOptIdx = Number(answers[idx]);
+            if (!isNaN(selectedOptIdx) && q.options) {
+                // Find index of correct option
+                const correctOptIdx = q.options.findIndex(opt => opt.isCorrect);
+                if (selectedOptIdx === correctOptIdx) {
+                    correctCount++;
+                }
+            }
+        });
+
+        const score = correctCount;
+        const total = flattenedQuestions.length;
+        const percentage = total > 0 ? (score / total) * 100 : 0;
+
         const attemptData = {
+            userId: session?.user?.id, // Optional here, handled by server session
             quizId: testId,
             quizTitle: quiz.title,
-            answers,
-            questions: flattenedQuestions,
-            timestamp: new Date().toISOString()
+            quizType: quiz.testType || 'Unknown',
+            score,
+            totalQuestions: total,
+            percentage,
+            responses: answers
         };
-        localStorage.setItem('lastAttempt', JSON.stringify(attemptData));
-        router.push(`/result/${Date.now()}`);
+
+        try {
+            // Save to DB
+            const res = await fetch('/api/attempts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attemptData)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                console.error("Failed to save attempt:", res.status, res.statusText, errData);
+                // alert(`Failed to save progress: ${res.status} ${errData.error || ''}`); // Optional: notify user visually
+            }
+
+            // Still save to local storage for Result page redundancy
+            localStorage.setItem('lastAttempt', JSON.stringify({
+                ...attemptData,
+                questions: flattenedQuestions, // Needed for result review
+                timestamp: new Date().toISOString()
+            }));
+
+            router.push(`/result/${Date.now()}`);
+        } catch (error) {
+            console.error("Error submitting test:", error);
+            // Fallback: still go to result
+            router.push(`/result/${Date.now()}`);
+        }
+    };
+
+    const handleSubmitRequest = () => {
+        setShowSubmitConfirmation(true);
     };
 
     // Updated: Explicitly jump to the start index of the selected section
@@ -189,6 +242,10 @@ export default function TestPage() {
     const handleNext = () => {
         if (currentQuestionIndex < flattenedQuestions.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
+        } else if (currentQuestionIndex === flattenedQuestions.length - 1) {
+            // If it's the last question and user clicks "Finish" (which calls this or similar logic)
+            // We can trigger submit request here if the button logic unifies Next/Finish.
+            handleSubmitRequest();
         }
     };
 
@@ -205,12 +262,10 @@ export default function TestPage() {
 
     // Recalculate distinct counts for UI
     const totalQuestions = flattenedQuestions.length;
-    const answeredCount = Object.keys(answers).length;
-    const markedCount = markedForReview.size;
-    // For "Not Visited", typically in these apps it means questions you haven't even reached.
-    // Since we don't track "reach", we can treat "Not Answered" as the metric, or "Not Visited" as (Total - Answered - Marked) approx.
-    // Let's just use "Not Answered" which is simpler and more accurate.
-    const notAnsweredCount = totalQuestions - answeredCount;
+    // statusCounts already provides these
+    // const answeredCount = Object.keys(answers).length;
+    // const markedCount = markedForReview.size;
+    // const notAnsweredCount = totalQuestions - answeredCount;
 
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 dark:bg-black">
@@ -229,9 +284,15 @@ export default function TestPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
-                    <Timer durationMinutes={quiz.timerMinutes || 60} onTimeUp={handleSubmit} />
+                    {isTestStarted ? (
+                        <Timer durationMinutes={quiz.timerMinutes || 60} onTimeUp={executeSubmit} />
+                    ) : (
+                        <div className="font-mono text-xl font-bold px-4 py-2 rounded-lg text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
+                            {quiz.timerMinutes || 60}:00
+                        </div>
+                    )}
                     <button
-                        onClick={handleSubmit}
+                        onClick={handleSubmitRequest}
                         className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 sm:px-6 sm:py-2 rounded-lg text-xs sm:text-base font-bold transition-colors whitespace-nowrap"
                     >
                         Submit <span className="hidden sm:inline">Test</span>
@@ -304,7 +365,11 @@ export default function TestPage() {
                                         className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 font-medium text-sm sm:text-base truncate"
                                         onClick={() => {
                                             toggleMarkReview();
-                                            handleNext();
+                                            if (currentQuestionIndex === flattenedQuestions.length - 1) {
+                                                setShowLastQuestionMarkedModal(true);
+                                            } else {
+                                                handleNext();
+                                            }
                                         }}
                                     >
                                         Mark & Next
@@ -352,7 +417,7 @@ export default function TestPage() {
                                 <span className="text-xs text-gray-600 dark:text-gray-400">Marked</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-200 text-gray-600 text-xs font-bold">0</span>
+                                <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-200 text-gray-600 text-xs font-bold">{notVisitedCount}</span>
                                 <span className="text-xs text-gray-600 dark:text-gray-400">Not Visited</span>
                             </div>
                         </div>
@@ -383,12 +448,22 @@ export default function TestPage() {
                                             // Marked: Purple/Yellow
                                             // Not Answered: Red (if visited) or Grey
 
-                                            // Replicating typical logic:
+                                            // Order of precedence: Current > Marked > Answered > Default
+                                            // Actually standard colors:
+                                            // Answered: Green
+                                            // Marked: Purple/Yellow
+                                            // Not Answered: Red (Visited but no answer)
+                                            // Not Visited: Grey (Not visited)
+
+                                            // Check visited state
+                                            const isVisited = visitedQuestions.has(rawIdx);
+
                                             if (isCurrent) bgClass = "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 bg-white dark:bg-gray-800 font-extrabold z-10";
                                             else if (isMarked && isAnswered) bgClass = "bg-purple-600 text-white border-purple-700 relative"; // Marked & Answered - often purple with green dot
                                             else if (isMarked) bgClass = "bg-yellow-400 text-white border-yellow-500 hover:bg-yellow-500";
                                             else if (isAnswered) bgClass = "bg-green-500 text-white border-green-600 hover:bg-green-600";
-                                            else bgClass = "bg-red-50 text-red-800 border-red-200"; // Treat unvisited as red-ish or grey
+                                            else if (isVisited) bgClass = "bg-red-50 text-red-800 border-red-200"; // Visited & Not Answered = Red
+                                            else bgClass = "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700"; // Not Visited = Grey
 
                                             return (
                                                 <button
@@ -411,6 +486,119 @@ export default function TestPage() {
                     </div>
                 </aside>
             </div>
+
+            {/* Confirmation Overlay */}
+            {!isTestStarted && !loading && quiz && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative overflow-hidden animate-in fade-in zoom-in duration-300">
+                        {/* Decorative background circle */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
+
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400">
+                            <FaClock size={32} />
+                        </div>
+
+                        <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{quiz.title}</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">{quiz.associatedExamName || quiz.testType}</p>
+
+                        <div className="flex justify-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                            <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg min-w-[80px]">
+                                <span className="font-bold text-gray-900 dark:text-white text-lg">{flattenedQuestions.length}</span>
+                                <span>Questions</span>
+                            </div>
+                            <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg min-w-[80px]">
+                                <span className="font-bold text-gray-900 dark:text-white text-lg">{quiz.timerMinutes || 60}</span>
+                                <span>Minutes</span>
+                            </div>
+                        </div>
+
+                        <div className="text-left bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-sm text-blue-800 dark:text-blue-200">
+                            <p className="font-bold mb-1">Instructions:</p>
+                            <ul className="list-disc pl-4 space-y-1 opacity-90">
+                                <li>The timer will start immediately after you click Start.</li>
+                                <li>You cannot pause the test once started.</li>
+                                <li>Ensure you have a stable internet connection.</li>
+                                <li>Do not refresh the page during the test.</li>
+                            </ul>
+                        </div>
+
+                        <button
+                            onClick={() => setIsTestStarted(true)}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                            Start Test Now
+                        </button>
+
+                        <button
+                            onClick={() => router.back()}
+                            className="mt-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm font-medium transition-colors"
+                        >
+                            Cancel and Go Back
+                        </button>
+                    </div>
+                </div>
+            )}
+            {/* Submit Confirmation Overlay */}
+            {showSubmitConfirmation && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative animate-in fade-in zoom-in duration-200">
+                        <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 dark:text-green-400">
+                            <FaClipboardList size={28} />
+                        </div>
+                        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Finish Test?</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                            Are you sure you want to submit your test? You won't be able to change your answers after this.
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-4 text-center mb-6 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <div>
+                                <div className="text-lg font-bold text-green-600">{answeredCount}</div>
+                                <div className="text-xs text-gray-500">Answered</div>
+                            </div>
+                            <div>
+                                <div className="text-lg font-bold text-gray-600 dark:text-gray-400">{notAnsweredCount}</div>
+                                <div className="text-xs text-gray-500">Unanswered</div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowSubmitConfirmation(false)}
+                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Continue Test
+                            </button>
+                            <button
+                                onClick={executeSubmit}
+                                className="flex-1 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-200 dark:shadow-none transition-all transform hover:scale-[1.02]"
+                            >
+                                Submit Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Last Question Marked for Review Modal */}
+            {showLastQuestionMarkedModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative animate-in fade-in zoom-in duration-200">
+                        <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-600 dark:text-yellow-400">
+                            <FaClipboardList size={28} />
+                        </div>
+                        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Marked for Review</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                            You have reached the last question. This question has been marked for review.
+                        </p>
+
+                        <button
+                            onClick={() => setShowLastQuestionMarkedModal(false)}
+                            className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none transition-all transform hover:scale-[1.02]"
+                        >
+                            Okay, Got it
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -18,7 +18,8 @@ export default function ResultPage() {
 
     if (!result) return <div className="p-10 text-center">Loading Results...</div>;
 
-    const { quizTitle, answers, questions } = result;
+    const { quizTitle, responses, answers: legacyAnswers, questions } = result;
+    const answers = responses || legacyAnswers || {};
 
     // Calculate Score
     let correctCount = 0;
@@ -34,13 +35,18 @@ export default function ResultPage() {
         maxScore += (q.marks || 1);
 
         if (isAttempted) {
-            const selectedOption = q.options[selectedOptIdx];
+            // Safe access using optional chaining
+            const selectedOption = q.options?.[selectedOptIdx];
+
             if (selectedOption && selectedOption.isCorrect) {
                 correctCount++;
                 totalScore += (q.marks || 1);
-            } else {
+            } else if (selectedOption) { // Only count wrong if option exists (valid attempt)
                 incorrectCount++;
                 totalScore -= (q.negativeMarks || 0);
+            } else {
+                // Attempted but invalid option index or missing options
+                console.warn(`Invalid attempt at index ${idx}`);
             }
         } else {
             unattemptedCount++;
@@ -113,7 +119,7 @@ export default function ResultPage() {
                             </div>
 
                             <div className="space-y-2 mt-4">
-                                {q.options.map((opt, optIdx) => {
+                                {q.options && q.options.map((opt, optIdx) => {
                                     const isSelected = selectedOptIdx === optIdx;
                                     const isThisCorrect = opt.isCorrect;
 
@@ -125,7 +131,7 @@ export default function ResultPage() {
                                     return (
                                         <div key={optIdx} className={`p-3 rounded border flex items-center gap-3 ${optClass}`}>
                                             <div className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs ${isThisCorrect ? 'bg-green-500 text-white border-green-600' :
-                                                    (isSelected ? 'bg-red-500 text-white border-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500')
+                                                (isSelected ? 'bg-red-500 text-white border-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500')
                                                 }`}>
                                                 {String.fromCharCode(65 + optIdx)}
                                             </div>
