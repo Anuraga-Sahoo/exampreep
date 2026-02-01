@@ -11,7 +11,10 @@ export async function GET(request, { params }) {
         const { examId } = await params;
 
         // Fetch specific exam and populate using the NEW correct reference
-        const exam = await Exam.findById(examId).populate('previousYearExamsIds');
+        const exam = await Exam.findById(examId).populate({
+            path: 'previousYearExamsIds',
+            match: { status: 'Published' }
+        });
 
         if (!exam) {
             return NextResponse.json({ error: "Exam not found" }, { status: 404 });

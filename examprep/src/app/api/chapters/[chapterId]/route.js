@@ -8,7 +8,10 @@ export async function GET(request, { params }) {
         await dbConnect();
         const { chapterId } = await params;
 
-        const chapter = await Chapter.findById(chapterId).populate('quizIds');
+        const chapter = await Chapter.findById(chapterId).populate({
+            path: 'quizIds',
+            match: { status: 'Published' }
+        });
 
         if (!chapter) {
             return NextResponse.json({ error: "Chapter not found" }, { status: 404 });

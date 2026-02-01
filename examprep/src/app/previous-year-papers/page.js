@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaBookOpen, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen, FaFileAlt } from 'react-icons/fa';
+import { FaBookOpen, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen, FaFileAlt, FaSearch } from 'react-icons/fa';
 
 export default function PreviousYearPapersPage() {
     const router = useRouter();
@@ -12,6 +12,19 @@ export default function PreviousYearPapersPage() {
     const [viewMode, setViewMode] = useState("gallery"); // 'gallery' (all exams) or 'papers' (specific exam papers)
     const [activeExam, setActiveExam] = useState(null);
     const [loadingPapers, setLoadingPapers] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+    // Debounce search query
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 300);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchQuery]);
 
     useEffect(() => {
         async function fetchPYQExams() {
@@ -33,9 +46,11 @@ export default function PreviousYearPapersPage() {
     // Extract categories
     const categories = ["All", ...new Set(exams.map(e => e.category || "General").filter(Boolean))];
 
-    const filteredExams = selectedCategory === "All"
-        ? exams
-        : exams.filter(e => (e.category || "General") === selectedCategory);
+    const filteredExams = exams.filter(e => {
+        const matchesCategory = selectedCategory === "All" || (e.category || "General") === selectedCategory;
+        const matchesSearch = (e.name || "").toLowerCase().includes((debouncedSearchQuery || "").toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     const handleExamClick = async (exam) => {
         // Set basic info mainly for title while loading
@@ -99,35 +114,49 @@ export default function PreviousYearPapersPage() {
                 {/* Main Content */}
                 <div className="flex-1">
                     {viewMode === "gallery" ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredExams.length > 0 ? (
-                                filteredExams.map((exam) => (
-                                    <div
-                                        key={exam._id}
-                                        onClick={() => handleExamClick(exam)}
-                                        className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group"
-                                    >
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                                                {exam.name[0]}
+                        <>
+                            {/* Search Bar */}
+                            <div className="mb-6 relative">
+                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search specific exams..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 shadow-sm transition-all"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredExams.length > 0 ? (
+                                    filteredExams.map((exam) => (
+                                        <div
+                                            key={exam._id}
+                                            onClick={() => handleExamClick(exam)}
+                                            className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group"
+                                        >
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
+                                                    {exam.name[0]}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-lg group-hover:text-blue-600 transition-colors">{exam.name}</h3>
+                                                    <p className="text-xs text-gray-500">{exam.previousYearExamsIds?.length || 0} Papers</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg group-hover:text-blue-600 transition-colors">{exam.name}</h3>
-                                                <p className="text-xs text-gray-500">{exam.previousYearExamsIds?.length || 0} Papers</p>
+                                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                                <span>View Papers</span>
+                                                <span className="group-hover:translate-x-1 transition-transform"><FaArrowRight /></span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm text-gray-500">
-                                            <span>View Papers</span>
-                                            <span className="group-hover:translate-x-1 transition-transform"><FaArrowRight /></span>
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-10 text-gray-500 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-200">
+                                        No exams found in this category.
                                     </div>
-                                ))
-                            ) : (
-                                <div className="col-span-full text-center py-10 text-gray-500 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-200">
-                                    No exams found in this category.
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        </>
                     ) : (
                         // Papers View
                         <div className="animate-in slide-in-from-right-4 duration-300">

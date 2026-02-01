@@ -13,7 +13,14 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Invalid Subject ID" }, { status: 400 });
         }
 
-        const subject = await Subject.findById(subjectId).populate('associatedChapterIds');
+        const subject = await Subject.findById(subjectId).populate({
+            path: 'associatedChapterIds',
+            populate: {
+                path: 'quizIds',
+                match: { status: 'Published' },
+                select: '_id'
+            }
+        });
 
         if (!subject) {
             return NextResponse.json({ error: "Subject not found" }, { status: 404 });

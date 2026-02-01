@@ -8,7 +8,10 @@ export async function GET(request, { params }) {
         await dbConnect();
         const { examId } = await params;
 
-        const exam = await Exam.findById(examId).populate('mockExamIds');
+        const exam = await Exam.findById(examId).populate({
+            path: 'mockExamIds',
+            match: { status: 'Published' }
+        });
 
         if (!exam) {
             return NextResponse.json({ error: "Exam not found" }, { status: 404 });
