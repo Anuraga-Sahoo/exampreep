@@ -40,12 +40,26 @@ export const authOptions = {
                 if (dbUser) {
                     session.user.id = dbUser._id;
                     session.user.subscription = dbUser.subscription;
+                    session.user.name = dbUser.name;
+                    session.user.image = dbUser.image;
+                    session.user.phone = dbUser.phone;
                 }
                 return session;
             } catch (error) {
                 console.error("Error fetching user data for session:", error);
                 return session;
             }
+        },
+        async redirect({ url, baseUrl }) {
+            // Force redirect to dashboard if resolving to home
+            if (url === '/' || url === baseUrl) {
+                return baseUrl + '/dashboard';
+            }
+            // Allows relative callback URLs
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            // Allows callback URLs on the same origin
+            else if (new URL(url).origin === baseUrl) return url;
+            return baseUrl + '/dashboard';
         },
     },
     pages: {

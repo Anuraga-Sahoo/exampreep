@@ -5,29 +5,17 @@ import { useSession } from 'next-auth/react';
 
 export default function DashboardPage() {
     const { data: session } = useSession();
-    const [exams, setExams] = useState([]);
+
     const [attempts, setAttempts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                // Parallel fetch
-                const [examsRes, attemptsRes] = await Promise.all([
-                    fetch('/api/exams'),
-                    fetch('/api/attempts')
-                ]);
-
-                if (examsRes.ok) {
-                    const examsData = await examsRes.json();
-                    setExams(examsData);
-                } else {
-                    console.error("Failed to fetch exams:", examsRes.status);
-                }
+                const attemptsRes = await fetch('/api/attempts');
 
                 if (attemptsRes.ok) {
                     const attemptsData = await attemptsRes.json();
-                    console.log("Fetched Attempts:", attemptsData);
                     setAttempts(attemptsData);
                 } else {
                     console.error("Failed to fetch attempts:", attemptsRes.status);
@@ -52,16 +40,16 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold mb-6">Welcome, {session?.user?.name || "Student"}</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Mock Tests Taken</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-700">Mock Tests Taken</h3>
                     <p className="text-4xl font-bold text-blue-600">{testsTaken}</p>
                 </div>
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Average Score</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-700">Average Score</h3>
                     <p className="text-4xl font-bold text-green-600">{averageScore}%</p>
                 </div>
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Active Course</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-700">Active Course</h3>
                     <p className="text-xl font-medium">General</p>
                 </div>
             </div>
@@ -70,10 +58,10 @@ export default function DashboardPage() {
             <div className="mb-10">
                 <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
                 {attempts.length > 0 ? (
-                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 uppercase font-medium border-b border-gray-200 dark:border-gray-700">
+                                <thead className="bg-gray-50 text-gray-500 uppercase font-medium border-b border-gray-200">
                                     <tr>
                                         <th className="px-6 py-4">Test Name</th>
                                         <th className="px-6 py-4">Date</th>
@@ -81,9 +69,9 @@ export default function DashboardPage() {
                                         <th className="px-6 py-4 text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tbody className="divide-y divide-gray-100">
                                     {attempts.slice(0, 3).map((attempt) => (
-                                        <tr key={attempt._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <tr key={attempt._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 font-medium">{attempt.quizTitle}</td>
                                             <td className="px-6 py-4 text-gray-500">
                                                 {new Date(attempt.createdAt).toLocaleDateString()}
@@ -133,39 +121,13 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500">
+                    <div className="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500">
                         No tests taken yet. Start practicing today!
                     </div>
                 )}
             </div>
 
-            <div className="mt-10">
-                <h2 className="text-xl font-bold mb-4">Your Exams</h2>
-                {loading ? (
-                    <p>Loading exams...</p>
-                ) : exams.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {exams.map((exam) => (
-                            <Link key={exam._id} href={`/exams/${exam._id}`} className="block group">
-                                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all hover:shadow-md">
-                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4 font-bold text-xl">
-                                        {(exam.name?.[0] || exam.title?.[0] || 'E')}
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">{exam.name || exam.title}</h3>
-                                    <p className="text-gray-500 text-sm line-clamp-2">{exam.description || "No description available."}</p>
-                                    <div className="mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                        {exam.category || "General"}
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-8 text-center text-gray-500">
-                        No exams found.
-                    </div>
-                )}
-            </div>
+
         </div>
     );
 }

@@ -268,18 +268,18 @@ export default function TestPage() {
     // const notAnsweredCount = totalQuestions - answeredCount;
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 dark:bg-black">
+        <div className="flex flex-col h-[calc(100vh-64px)] bg-white">
             {/* Top Header: Title, Timer, Submit */}
-            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-between items-center shadow-sm z-30 relative">
+            <header className="bg-white border-b border-gray-100 px-4 py-3 flex justify-between items-center shadow-sm z-30 relative">
                 <div className="flex items-center gap-3">
                     <button
-                        className="lg:hidden text-gray-600 dark:text-gray-300 p-1"
+                        className="lg:hidden text-gray-600 p-1"
                         onClick={() => setShowPalette(!showPalette)}
                     >
                         {showPalette ? <FaTimes size={20} /> : <FaList size={20} />}
                     </button>
                     <div>
-                        <h1 className="font-bold text-sm sm:text-lg line-clamp-1">{quiz.title}</h1>
+                        <h1 className="font-bold text-sm sm:text-lg line-clamp-1 text-gray-800">{quiz.title}</h1>
                         <span className="text-xs text-gray-500 hidden sm:inline">{quiz.associatedExamName || quiz.testType}</span>
                     </div>
                 </div>
@@ -287,7 +287,7 @@ export default function TestPage() {
                     {isTestStarted ? (
                         <Timer durationMinutes={quiz.timerMinutes || 60} onTimeUp={executeSubmit} />
                     ) : (
-                        <div className="font-mono text-xl font-bold px-4 py-2 rounded-lg text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
+                        <div className="font-mono text-xl font-bold px-4 py-2 rounded-lg text-gray-700 bg-gray-100">
                             {quiz.timerMinutes || 60}:00
                         </div>
                     )}
@@ -302,7 +302,7 @@ export default function TestPage() {
 
             {/* Section Tabs Bar - Fixed below header */}
             {sections.length > 0 && (
-                <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 flex gap-1 overflow-x-auto shadow-sm z-10">
+                <div className="bg-white border-b border-gray-100 px-6 flex gap-1 overflow-x-auto shadow-sm z-10">
                     {sections.map((section) => {
                         const isActive = section.id === currentSectionId;
                         return (
@@ -310,12 +310,12 @@ export default function TestPage() {
                                 key={section.id}
                                 onClick={() => handleSectionClick(section.startIndex)}
                                 className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors uppercase tracking-wide ${isActive
-                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700'
                                     }`}
                             >
                                 {section.name}
-                                <span className="ml-2 text-xs opacity-70 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded-full text-gray-600 dark:text-gray-400">
+                                <span className="ml-2 text-xs opacity-70 bg-gray-200 px-1.5 py-0.5 rounded-full text-gray-600">
                                     {section.count}
                                 </span>
                             </button>
@@ -327,7 +327,7 @@ export default function TestPage() {
             {/* Body */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Main Content */}
-                <main className="flex-1 p-6 overflow-y-auto flex flex-col">
+                <main className="flex-1 p-6 overflow-y-auto flex flex-col bg-white">
                     {flattenedQuestions.length > 0 ? (
                         <>
                             <QuestionViewer
@@ -342,7 +342,7 @@ export default function TestPage() {
                             />
 
                             {/* Navigation Bar */}
-                            <div className="flex flex-col-reverse sm:flex-row justify-between items-center mt-6 py-4 border-t border-gray-100 dark:border-gray-800 gap-4 sm:gap-0">
+                            <div className="flex flex-col-reverse sm:flex-row justify-between items-center mt-6 py-4 border-t border-gray-100 gap-4 sm:gap-0">
                                 <div className="flex gap-2 w-full sm:w-auto">
                                     <button
                                         disabled={currentQuestionIndex === 0}
@@ -375,7 +375,7 @@ export default function TestPage() {
                                         Mark & Next
                                     </button>
                                     <button
-                                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 dark:shadow-none text-sm sm:text-base whitespace-nowrap"
+                                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 text-sm sm:text-base whitespace-nowrap"
                                         onClick={handleNext}
                                     >
                                         {currentQuestionIndex === flattenedQuestions.length - 1 ? 'Finish' : 'Save & Next'}
@@ -390,39 +390,39 @@ export default function TestPage() {
 
                 {/* Question Palette (Sideboard) */}
                 <aside className={`
-                    fixed inset-0 top-[60px] z-20 bg-white dark:bg-gray-900 transform transition-transform duration-300 ease-in-out
-                    lg:static lg:transform-none lg:w-80 lg:border-l lg:border-gray-200 lg:dark:border-gray-800 lg:flex lg:flex-col
+                    fixed inset-0 top-[60px] z-20 bg-white transform transition-transform duration-300 ease-in-out
+                    lg:static lg:transform-none lg:w-80 lg:border-l lg:border-gray-200 lg:flex lg:flex-col
                     ${showPalette ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
                 `}>
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
-                        <h3 className="font-bold text-gray-800 dark:text-gray-200">Question Palette</h3>
+                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <h3 className="font-bold text-gray-800">Question Palette</h3>
                         <button className="lg:hidden text-gray-500" onClick={() => setShowPalette(false)}>
                             <FaTimes />
                         </button>
                     </div>
 
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                         {/* Status Counts Summary */}
                         <div className="grid grid-cols-2 gap-3 mb-4">
                             <div className="flex items-center gap-2">
                                 <span className="w-6 h-6 rounded flex items-center justify-center bg-green-500 text-white text-xs font-bold">{answeredCount}</span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Answered</span>
+                                <span className="text-xs text-gray-600">Answered</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="w-6 h-6 rounded flex items-center justify-center bg-red-500 text-white text-xs font-bold">{notAnsweredCount}</span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Not Answered</span>
+                                <span className="text-xs text-gray-600">Not Answered</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="w-6 h-6 rounded flex items-center justify-center bg-yellow-400 text-white text-xs font-bold">{markedCount}</span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Marked</span>
+                                <span className="text-xs text-gray-600">Marked</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-200 text-gray-600 text-xs font-bold">{notVisitedCount}</span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Not Visited</span>
+                                <span className="text-xs text-gray-600">Not Visited</span>
                             </div>
                         </div>
 
-                        <hr className="border-gray-200 dark:border-gray-700" />
+                        <hr className="border-gray-200" />
                     </div>
 
                     <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
@@ -430,7 +430,7 @@ export default function TestPage() {
                             <div key={section.id} className="mb-8">
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1 flex items-center justify-between">
                                     {section.name}
-                                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 px-2 py-0.5 rounded-full">{section.count}</span>
+                                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{section.count}</span>
                                 </h4>
                                 <div className="grid grid-cols-5 gap-2.5">
                                     {flattenedQuestions
@@ -441,7 +441,7 @@ export default function TestPage() {
                                             const isMarked = markedForReview.has(rawIdx);
                                             const isCurrent = currentQuestionIndex === rawIdx;
 
-                                            let bgClass = "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700";
+                                            let bgClass = "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200";
                                             // Order of precedence: Current > Marked > Answered > Default
                                             // Actually standard colors:
                                             // Answered: Green
@@ -458,12 +458,12 @@ export default function TestPage() {
                                             // Check visited state
                                             const isVisited = visitedQuestions.has(rawIdx);
 
-                                            if (isCurrent) bgClass = "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 bg-white dark:bg-gray-800 font-extrabold z-10";
+                                            if (isCurrent) bgClass = "ring-2 ring-blue-500 ring-offset-2 bg-white font-extrabold z-10";
                                             else if (isMarked && isAnswered) bgClass = "bg-purple-600 text-white border-purple-700 relative"; // Marked & Answered - often purple with green dot
                                             else if (isMarked) bgClass = "bg-yellow-400 text-white border-yellow-500 hover:bg-yellow-500";
                                             else if (isAnswered) bgClass = "bg-green-500 text-white border-green-600 hover:bg-green-600";
                                             else if (isVisited) bgClass = "bg-red-50 text-red-800 border-red-200"; // Visited & Not Answered = Red
-                                            else bgClass = "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700"; // Not Visited = Grey
+                                            else bgClass = "bg-gray-100 text-gray-400 border-gray-200"; // Not Visited = Grey
 
                                             return (
                                                 <button
@@ -490,29 +490,29 @@ export default function TestPage() {
             {/* Confirmation Overlay */}
             {!isTestStarted && !loading && quiz && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative overflow-hidden animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 text-center relative overflow-hidden animate-in fade-in zoom-in duration-300">
                         {/* Decorative background circle */}
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
 
-                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400">
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
                             <FaClock size={32} />
                         </div>
 
-                        <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{quiz.title}</h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">{quiz.associatedExamName || quiz.testType}</p>
+                        <h2 className="text-2xl font-bold mb-2 text-gray-900">{quiz.title}</h2>
+                        <p className="text-gray-500 mb-6 text-sm">{quiz.associatedExamName || quiz.testType}</p>
 
-                        <div className="flex justify-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
-                            <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg min-w-[80px]">
-                                <span className="font-bold text-gray-900 dark:text-white text-lg">{flattenedQuestions.length}</span>
+                        <div className="flex justify-center gap-4 text-sm text-gray-600 mb-6">
+                            <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg min-w-[80px]">
+                                <span className="font-bold text-gray-900 text-lg">{flattenedQuestions.length}</span>
                                 <span>Questions</span>
                             </div>
-                            <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg min-w-[80px]">
-                                <span className="font-bold text-gray-900 dark:text-white text-lg">{quiz.timerMinutes || 60}</span>
+                            <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg min-w-[80px]">
+                                <span className="font-bold text-gray-900 text-lg">{quiz.timerMinutes || 60}</span>
                                 <span>Minutes</span>
                             </div>
                         </div>
 
-                        <div className="text-left bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-sm text-blue-800 dark:text-blue-200">
+                        <div className="text-left bg-blue-50 p-4 rounded-lg mb-6 text-sm text-blue-800">
                             <p className="font-bold mb-1">Instructions:</p>
                             <ul className="list-disc pl-4 space-y-1 opacity-90">
                                 <li>The timer will start immediately after you click Start.</li>
@@ -531,7 +531,7 @@ export default function TestPage() {
 
                         <button
                             onClick={() => router.back()}
-                            className="mt-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm font-medium transition-colors"
+                            className="mt-4 text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
                         >
                             Cancel and Go Back
                         </button>
@@ -541,22 +541,22 @@ export default function TestPage() {
             {/* Submit Confirmation Overlay */}
             {showSubmitConfirmation && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative animate-in fade-in zoom-in duration-200">
-                        <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 dark:text-green-400">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 text-center relative animate-in fade-in zoom-in duration-200">
+                        <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
                             <FaClipboardList size={28} />
                         </div>
-                        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Finish Test?</h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                        <h2 className="text-xl font-bold mb-2 text-gray-900">Finish Test?</h2>
+                        <p className="text-gray-500 mb-6 text-sm">
                             Are you sure you want to submit your test? You won't be able to change your answers after this.
                         </p>
 
-                        <div className="grid grid-cols-2 gap-4 text-center mb-6 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <div className="grid grid-cols-2 gap-4 text-center mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100">
                             <div>
                                 <div className="text-lg font-bold text-green-600">{answeredCount}</div>
                                 <div className="text-xs text-gray-500">Answered</div>
                             </div>
                             <div>
-                                <div className="text-lg font-bold text-gray-600 dark:text-gray-400">{notAnsweredCount}</div>
+                                <div className="text-lg font-bold text-gray-600">{notAnsweredCount}</div>
                                 <div className="text-xs text-gray-500">Unanswered</div>
                             </div>
                         </div>
@@ -564,13 +564,13 @@ export default function TestPage() {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowSubmitConfirmation(false)}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                             >
                                 Continue Test
                             </button>
                             <button
                                 onClick={executeSubmit}
-                                className="flex-1 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-200 dark:shadow-none transition-all transform hover:scale-[1.02]"
+                                className="flex-1 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg shadow-green-200 transition-all transform hover:scale-[1.02]"
                             >
                                 Submit Now
                             </button>
@@ -581,18 +581,18 @@ export default function TestPage() {
             {/* Last Question Marked for Review Modal */}
             {showLastQuestionMarkedModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-800 text-center relative animate-in fade-in zoom-in duration-200">
-                        <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-600 dark:text-yellow-400">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 text-center relative animate-in fade-in zoom-in duration-200">
+                        <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-600">
                             <FaClipboardList size={28} />
                         </div>
-                        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Marked for Review</h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                        <h2 className="text-xl font-bold mb-2 text-gray-900">Marked for Review</h2>
+                        <p className="text-gray-500 mb-6 text-sm">
                             You have reached the last question. This question has been marked for review.
                         </p>
 
                         <button
                             onClick={() => setShowLastQuestionMarkedModal(false)}
-                            className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none transition-all transform hover:scale-[1.02]"
+                            className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.02]"
                         >
                             Okay, Got it
                         </button>

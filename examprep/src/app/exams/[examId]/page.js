@@ -34,7 +34,7 @@ export default function ExamDetailsPage() {
             <div className="mb-6">
                 <Link href="/dashboard" className="text-sm text-gray-500 hover:text-black mb-2 inline-block">← Back to Dashboard</Link>
                 <h1 className="text-3xl font-bold">{exam.name || exam.title}</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">{exam.description}</p>
+                <p className="text-gray-600 mt-2">{exam.description}</p>
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Available Quizzes</h2>
@@ -46,7 +46,7 @@ export default function ExamDetailsPage() {
                         if (!quiz || typeof quiz !== 'object') return null;
 
                         return (
-                            <div key={quiz._id} className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div key={quiz._id} className="bg-white p-6 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                                 <div>
                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-blue-50 text-blue-600 mb-2 inline-block">
                                         {quiz.testType || "Quiz"}
@@ -63,7 +63,7 @@ export default function ExamDetailsPage() {
                                         <span>{quiz.sections?.length || 1} Sections</span>
                                     </div>
                                 </div>
-                                <Link href={`/test/${quiz._id}`} className="bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-lg font-medium hover:opacity-80 transition-opacity text-center min-w-[140px]">
+                                <Link href={`/test/${quiz._id}`} className="bg-black text-white px-6 py-3 rounded-lg font-medium hover:opacity-80 transition-opacity text-center min-w-[140px]">
                                     Start Quiz
                                 </Link>
                             </div>

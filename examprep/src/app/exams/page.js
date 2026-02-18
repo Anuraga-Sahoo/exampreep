@@ -35,10 +35,10 @@ export default function ExamsPage() {
                     {classes.map((cls, index) => {
                         const cardId = cls._id || `temp-${index}`;
                         return (
-                            <div key={cardId} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all shadow-sm overflow-hidden flex flex-col h-full">
-                                <div className="p-6 bg-gray-50/50 dark:bg-gray-800/20 border-b border-gray-100 dark:border-gray-800">
+                            <div key={cardId} className="bg-white rounded-xl border border-gray-200 hover:border-blue-500 transition-all shadow-sm overflow-hidden flex flex-col h-full">
+                                <div className="p-6 bg-gray-50/50 border-b border-gray-100">
                                     <div className="flex items-center gap-4 mb-2">
-                                        <div className="w-10 h-10 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">
                                             {cls.name?.[0] || 'C'}
                                         </div>
                                         <h3 className="text-xl font-bold">{cls.name}</h3>
@@ -54,9 +54,9 @@ export default function ExamsPage() {
                                                 <li key={subject._id || subject}>
                                                     <Link
                                                         href={`/exams/subject/${subject._id || subject}`}
-                                                        className="block p-3 rounded-lg bg-gray-50 hover:bg-white dark:bg-gray-800/50 dark:hover:bg-gray-800 border border-transparent hover:border-blue-200 dark:hover:border-blue-900/50 hover:shadow-sm transition-all flex items-center justify-between group"
+                                                        className="block p-3 rounded-lg bg-gray-50 hover:bg-white border border-transparent hover:border-blue-200 hover:shadow-sm transition-all flex items-center justify-between group"
                                                     >
-                                                        <span className="font-medium text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                                        <span className="font-medium text-sm text-gray-700 group-hover:text-blue-600">
                                                             {subject.name || "Subject"}
                                                         </span>
                                                         <span className="text-xs text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
@@ -75,7 +75,7 @@ export default function ExamsPage() {
                     })}
                 </div>
             ) : (
-                <div className="text-center p-10 bg-white dark:bg-gray-900 rounded-xl border border-gray-200">
+                <div className="text-center p-10 bg-white rounded-xl border border-gray-200">
                     No classes found. Please check back later.
                 </div>
             )}

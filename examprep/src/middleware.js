@@ -6,4 +6,12 @@ export default withAuth({
     },
 });
 
-export const config = { matcher: ["/dashboard/:path*"] };
+export const config = {
+    matcher: [
+        "/dashboard/:path*",
+        "/exams/:path*",
+        "/mock-tests/:path*",
+        "/test/:path*",
+        "/previous-year-papers/:path*"
+    ]
+};

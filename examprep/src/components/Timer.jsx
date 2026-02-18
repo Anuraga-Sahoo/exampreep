@@ -29,7 +29,7 @@ export default function Timer({ durationMinutes, onTimeUp }) {
     };
 
     return (
-        <div className={`font-mono text-xl font-bold px-4 py-2 rounded-lg ${timeLeft < 300 ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300'}`}>
+        <div className={`font-mono text-xl font-bold px-4 py-2 rounded-lg ${timeLeft < 300 ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-100'}`}>
             {formatTime(timeLeft)}
         </div>
     );

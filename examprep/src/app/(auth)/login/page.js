@@ -1,8 +1,23 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/dashboard");
+        }
+    }, [status, router]);
+
+    if (status === "loading") {
+        return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+    }
+
     return (
         <div className="flex min-h-[80vh] items-center justify-center px-6">
             <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 text-center">

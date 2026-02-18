@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['free', 'paid'],
         default: 'free',
     },
+    phone: {
+        type: String,
+        default: "",
+    },
     createdAt: {
         type: Date,
         default: Date.now,
