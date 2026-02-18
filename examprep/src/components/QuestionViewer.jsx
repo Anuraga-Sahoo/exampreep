@@ -31,7 +31,7 @@ export default function QuestionViewer({
                         {question.text}
                     </p>
                     {question.imageUrl && (
-                        <div className="relative w-full max-w-lg h-60 mb-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div className="relative w-full max-w-lg h-60 mb-4 rounded-lg overflow-hidden border border-gray-200">
                             <Image
                                 src={question.imageUrl}
                                 alt="Question Image"
