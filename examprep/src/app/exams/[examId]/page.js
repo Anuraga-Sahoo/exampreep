@@ -26,7 +26,14 @@ export default function ExamDetailsPage() {
         if (examId) fetchExam();
     }, [examId]);
 
-    if (loading) return <div className="p-8 text-center">Loading Exam Details...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-teal-200 rounded-full animate-ping absolute opacity-50"></div>
+                <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin relative z-10"></div>
+            </div>
+        </div>
+    );
     if (!exam) return <div className="p-8 text-center">Exam not found.</div>;
 
     return (

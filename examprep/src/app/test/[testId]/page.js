@@ -255,7 +255,14 @@ export default function TestPage() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center">Loading Quiz...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-teal-200 rounded-full animate-ping absolute opacity-50"></div>
+                <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin relative z-10"></div>
+            </div>
+        </div>
+    );
     if (!quiz) return <div className="p-10 text-center">Quiz not found. <Link href="/dashboard" className="text-blue-600">Go back</Link></div>;
 
     const currentQuestion = flattenedQuestions[currentQuestionIndex];
@@ -342,18 +349,18 @@ export default function TestPage() {
                             />
 
                             {/* Navigation Bar */}
-                            <div className="flex flex-col-reverse sm:flex-row justify-between items-center mt-6 py-4 border-t border-gray-100 gap-4 sm:gap-0">
+                            <div className="flex flex-col sm:flex-row justify-between items-center mt-6 py-4 border-t border-gray-100 gap-3 sm:gap-0">
                                 <div className="flex gap-2 w-full sm:w-auto">
                                     <button
                                         disabled={currentQuestionIndex === 0}
                                         onClick={handlePrevious}
-                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium text-sm sm:text-base"
+                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium text-xs sm:text-base flex items-center justify-center gap-1.5"
                                     >
-                                        Previous
+                                        <FaArrowLeft className="hidden sm:block text-[10px] sm:text-xs" /> Previous
                                     </button>
                                     <button
                                         onClick={handleClearResponse}
-                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium text-sm sm:text-base truncate"
+                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium text-xs sm:text-base flex items-center justify-center truncate"
                                         title="Clear selected option"
                                     >
                                         Clear
@@ -362,7 +369,7 @@ export default function TestPage() {
 
                                 <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                                     <button
-                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 font-medium text-sm sm:text-base truncate"
+                                        className="flex-1 sm:flex-none px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 font-medium text-xs sm:text-base flex items-center justify-center whitespace-nowrap"
                                         onClick={() => {
                                             toggleMarkReview();
                                             if (currentQuestionIndex === flattenedQuestions.length - 1) {
@@ -372,13 +379,15 @@ export default function TestPage() {
                                             }
                                         }}
                                     >
-                                        Mark & Next
+                                        Mark <span className="hidden xs:inline">& Next</span>
                                     </button>
                                     <button
-                                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 text-sm sm:text-base whitespace-nowrap"
+                                        className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-sm shadow-blue-200 text-xs sm:text-base flex items-center justify-center whitespace-nowrap"
                                         onClick={handleNext}
                                     >
-                                        {currentQuestionIndex === flattenedQuestions.length - 1 ? 'Finish' : 'Save & Next'}
+                                        {currentQuestionIndex === flattenedQuestions.length - 1 ? 'Finish' : (
+                                            <>Save <span className="hidden xs:inline">& Next</span> <FaArrowRight className="hidden sm:block ml-1.5 text-[10px] sm:text-xs" /></>
+                                        )}
                                     </button>
                                 </div>
                             </div>

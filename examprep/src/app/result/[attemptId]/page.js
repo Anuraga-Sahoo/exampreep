@@ -16,7 +16,14 @@ export default function ResultPage() {
         }
     }, []);
 
-    if (!result) return <div className="p-10 text-center">Loading Results...</div>;
+    if (!result) return (
+        <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-teal-200 rounded-full animate-ping absolute opacity-50"></div>
+                <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin relative z-10"></div>
+            </div>
+        </div>
+    );
 
     const { quizTitle, responses, answers: legacyAnswers, questions } = result;
     const answers = responses || legacyAnswers || {};

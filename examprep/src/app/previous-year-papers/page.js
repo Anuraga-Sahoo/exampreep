@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaBookOpen, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen, FaFileAlt, FaSearch } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaBookOpen, FaClock, FaArrowRight, FaArrowLeft, FaFolderOpen, FaFileAlt, FaSearch, FaCheckCircle } from 'react-icons/fa';
 
 export default function PreviousYearPapersPage() {
     const router = useRouter();
@@ -79,143 +80,227 @@ export default function PreviousYearPapersPage() {
         setViewMode("gallery");
     };
 
-    if (loading) return <div className="p-10 text-center">Loading Previous Year Papers...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-amber-200 rounded-full animate-ping absolute opacity-50"></div>
+                <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin relative z-10"></div>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
-            <h1 className="text-3xl font-bold mb-2">Previous Year Papers</h1>
-            <p className="text-gray-600 mb-8">Access past papers to boost your preparation.</p>
+        <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden pb-20">
+            {/* Premium Header Background */}
+            <div className="absolute top-0 w-full h-[400px] bg-gradient-to-b from-amber-50/80 to-transparent -z-10"></div>
+            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-amber-300/20 rounded-full blur-[120px] -z-10 animate-pulse"></div>
 
-            <div className="flex flex-col lg:flex-row gap-6 min-h-[500px]">
-
-                {/* Left Sidebar: Categories (Visible in Gallery Mode) */}
-                {viewMode === "gallery" && (
-                    <aside className="w-full lg:w-64 flex-shrink-0">
-                        <div className="bg-white rounded-xl border border-gray-200 p-4 sticky top-24">
-                            <h2 className="font-bold text-gray-700 mb-4 px-2">Categories</h2>
-                            <div className="space-y-1">
-                                {categories.map((cat) => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat
-                                            ? 'bg-blue-50 text-blue-600'
-                                            : 'text-gray-600 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
+            <div className="container mx-auto p-6 md:p-10 max-w-7xl pt-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-12"
+                >
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-amber-500/30 border border-amber-300">
+                            <FaFileAlt />
                         </div>
-                    </aside>
-                )}
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">Previous Year Papers</h1>
+                            <p className="text-gray-500 font-medium text-lg">Access past papers to understand exam patterns and boost your preparation.</p>
+                        </div>
+                    </div>
+                </motion.div>
 
-                {/* Main Content */}
-                <div className="flex-1">
-                    {viewMode === "gallery" ? (
-                        <>
-                            {/* Search Bar */}
-                            <div className="mb-6 relative">
-                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search specific exams..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm transition-all"
-                                />
-                            </div>
+                <div className="flex flex-col lg:flex-row gap-8 min-h-[500px]">
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredExams.length > 0 ? (
-                                    filteredExams.map((exam) => (
-                                        <div
-                                            key={exam._id}
-                                            onClick={() => handleExamClick(exam)}
-                                            className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group"
-                                        >
-                                            <div className="flex items-center gap-4 mb-4">
-                                                <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
-                                                    {exam.name[0]}
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-bold text-lg group-hover:text-blue-600 transition-colors">{exam.name}</h3>
-                                                    <p className="text-xs text-gray-500">{exam.previousYearExamsIds?.length || 0} Papers</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between items-center text-sm text-gray-500">
-                                                <span>View Papers</span>
-                                                <span className="group-hover:translate-x-1 transition-transform"><FaArrowRight /></span>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="col-span-full text-center py-10 text-gray-500 bg-white rounded-xl border border-dashed border-gray-200">
-                                        No exams found in this category.
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        // Papers View
-                        <div className="animate-in slide-in-from-right-4 duration-300">
-                            <button
-                                onClick={handleBackToGallery}
-                                className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                    {/* Category Navigation */}
+                    <AnimatePresence mode="wait">
+                        {viewMode === "gallery" && (
+                            <motion.aside
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, width: 0, overflow: 'hidden' }}
+                                className="w-full lg:w-64 flex-shrink-0"
                             >
-                                <FaArrowLeft /> Back to Exams
-                            </button>
-
-                            <div className="bg-white rounded-xl border border-gray-200 p-8">
-                                <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
-                                    <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-3xl">
-                                        {activeExam.name[0]}
-                                    </div>
-                                    <div>
-                                        <h2 className="text-3xl font-bold">{activeExam.name}</h2>
-                                        <p className="text-gray-500">Previous Year Question Papers</p>
-                                    </div>
-                                </div>
-
-                                {loadingPapers ? (
-                                    <div className="text-center py-20">
-                                        <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                                        <p className="text-gray-500">Loading Papers...</p>
-                                    </div>
-                                ) : activeExam.previousYearExamsIds && activeExam.previousYearExamsIds.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {activeExam.previousYearExamsIds.map((paper) => (
-                                            <div key={paper._id || paper} className="border border-gray-200 rounded-xl p-5 hover:border-blue-400 hover:shadow-md transition-all group bg-gray-50">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <span className="px-2 py-1 bg-white text-gray-600 border border-gray-200 text-xs font-bold rounded">
-                                                        {paper.year || "2024"}
-                                                    </span>
-                                                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                        <FaClock className="inline mb-0.5" /> {paper.timerMinutes || 60} min
-                                                    </span>
-                                                </div>
-                                                <h3 className="font-bold text-lg mb-4 text-gray-800 line-clamp-2">
-                                                    {paper.title || paper.name}
-                                                </h3>
-                                                <button
-                                                    onClick={() => router.push(`/test/${paper._id}`)}
-                                                    className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors shadow-sm shadow-blue-200"
-                                                >
-                                                    Start Test
-                                                </button>
-                                            </div>
+                                <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-white shadow-xl shadow-teal-900/5 p-4 lg:p-5 lg:sticky top-24">
+                                    <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 lg:mb-4 px-2 hidden lg:block">Categories</h2>
+                                    <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible space-x-2 lg:space-x-0 lg:space-y-1.5 pb-2 lg:pb-0 custom-scrollbar">
+                                        {categories.map((cat) => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setSelectedCategory(cat)}
+                                                className={`flex-shrink-0 lg:w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-between whitespace-nowrap lg:whitespace-normal ${selectedCategory === cat
+                                                    ? 'bg-gradient-to-r from-teal-50 to-emerald-50 text-teal-700 lg:border-l-4 lg:border-b-0 border-b-4 border-teal-500 shadow-sm'
+                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                    }`}
+                                            >
+                                                <span>{cat}</span>
+                                                {selectedCategory === cat && <FaCheckCircle className="text-teal-500 hidden lg:block" />}
+                                            </button>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div className="text-center py-16 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
-                                        <div className="text-5xl mb-4 flex justify-center"><FaFolderOpen className="opacity-20" /></div>
-                                        <p className="text-lg">No papers available yet.</p>
+                                </div>
+                            </motion.aside>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        <AnimatePresence mode="wait">
+                            {viewMode === "gallery" ? (
+                                <motion.div
+                                    key="gallery"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                >
+                                    {/* Search Bar */}
+                                    <div className="mb-8 relative group">
+                                        <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search past exams..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white focus:outline-none focus:ring-4 focus:ring-amber-500/20 bg-white/90 backdrop-blur-md shadow-lg shadow-amber-900/5 transition-all text-gray-700 font-medium placeholder-gray-400"
+                                        />
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+
+                                    <motion.div
+                                        variants={{
+                                            hidden: { opacity: 0 },
+                                            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                                        }}
+                                        initial="hidden"
+                                        animate="visible"
+                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                                    >
+                                        {filteredExams.length > 0 ? (
+                                            filteredExams.map((exam, i) => (
+                                                <motion.div
+                                                    key={exam._id}
+                                                    variants={{
+                                                        hidden: { opacity: 0, y: 20 },
+                                                        visible: { opacity: 1, y: 0 }
+                                                    }}
+                                                    whileHover={{ y: -6, scale: 1.02 }}
+                                                    onClick={() => handleExamClick(exam)}
+                                                    className="bg-white/90 backdrop-blur-md rounded-3xl border border-white hover:border-amber-100 p-6 shadow-xl shadow-amber-900/5 hover:shadow-2xl hover:shadow-amber-900/10 transition-all cursor-pointer group relative overflow-hidden"
+                                                >
+                                                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100/50 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-amber-200/50 transition-colors"></div>
+
+                                                    <div className="flex items-center gap-4 mb-6 relative z-10">
+                                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-2xl group-hover:scale-110 shadow-sm transition-transform">
+                                                            {exam.name[0]}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-amber-600 transition-colors leading-tight">{exam.name}</h3>
+                                                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">{exam.previousYearExamsIds?.length || 0} Papers</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-sm font-bold text-amber-600 bg-amber-50/50 px-4 py-2 rounded-xl group-hover:bg-amber-50 transition-colors">
+                                                        <span>View Papers</span>
+                                                        <span className="group-hover:translate-x-1 transition-transform"><FaArrowRight /></span>
+                                                    </div>
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full text-center py-16 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-gray-200">
+                                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                                    <FaSearch size={24} />
+                                                </div>
+                                                <p className="text-gray-500 font-medium">No exams found matching your search.</p>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                </motion.div>
+                            ) : (
+                                // Papers View
+                                <motion.div
+                                    key="papers"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="w-full"
+                                >
+                                    <button
+                                        onClick={handleBackToGallery}
+                                        className="mb-6 flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-amber-600 transition-colors px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100 w-max"
+                                    >
+                                        <FaArrowLeft /> Back to Exams
+                                    </button>
+
+                                    <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-white shadow-xl shadow-amber-900/5 p-8 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+
+                                        <div className="flex items-center gap-5 mb-10 pb-8 border-b border-gray-50 relative z-10">
+                                            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center font-black text-4xl shadow-lg border-2 border-white">
+                                                {activeExam.name[0]}
+                                            </div>
+                                            <div>
+                                                <h2 className="text-3xl font-black text-gray-900 tracking-tight">{activeExam.name}</h2>
+                                                <p className="text-amber-600 font-bold uppercase tracking-widest text-xs mt-1">Previous Year Question Papers</p>
+                                            </div>
+                                        </div>
+
+                                        {loadingPapers ? (
+                                            <div className="text-center py-20 flex flex-col items-center justify-center">
+                                                <div className="relative mb-4">
+                                                    <div className="w-12 h-12 border-4 border-amber-200 rounded-full animate-ping absolute opacity-50"></div>
+                                                    <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin relative z-10"></div>
+                                                </div>
+                                                <p className="text-amber-700 font-bold">Loading Past Papers...</p>
+                                            </div>
+                                        ) : activeExam.previousYearExamsIds && activeExam.previousYearExamsIds.length > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                                {activeExam.previousYearExamsIds.map((paper, idx) => (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: idx * 0.05 }}
+                                                        key={paper._id || paper}
+                                                        className="border border-gray-100 rounded-2xl p-6 hover:border-amber-300 hover:shadow-lg transition-all group bg-gradient-to-b from-white to-gray-50/50 relative overflow-hidden"
+                                                    >
+                                                        {/* Ticket stub dash */}
+                                                        <div className="absolute -left-2 top-1/2 w-4 h-4 bg-[#f8fafc] rounded-full border-r border-gray-100 -translate-y-1/2"></div>
+                                                        <div className="absolute -right-2 top-1/2 w-4 h-4 bg-[#f8fafc] rounded-full border-l border-gray-100 -translate-y-1/2"></div>
+
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                                                {paper.year || "Past Paper"}
+                                                            </span>
+                                                            <span className="text-xs font-bold text-gray-500 flex items-center gap-1.5 bg-gray-100 px-3 py-1 rounded-full">
+                                                                <FaClock className="text-gray-400" /> {paper.timerMinutes || 60} min
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="font-extrabold text-xl mb-6 text-gray-900 line-clamp-2 leading-tight">
+                                                            {paper.title || paper.name}
+                                                        </h3>
+                                                        <button
+                                                            onClick={() => router.push(`/test/${paper._id}`)}
+                                                            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-sm transition-all shadow-md shadow-amber-500/20 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                                        >
+                                                            Start Challenge <FaArrowRight />
+                                                        </button>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100 relative z-10">
+                                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300 shadow-sm">
+                                                    <FaFolderOpen size={32} />
+                                                </div>
+                                                <h3 className="text-xl font-black text-gray-800 mb-2">No papers available</h3>
+                                                <p className="text-gray-500 font-medium">This exam doesn't have any past papers added yet.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
         </div>

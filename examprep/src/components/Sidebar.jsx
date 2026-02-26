@@ -21,41 +21,56 @@ export default function Sidebar() {
     ];
 
     return (
-        <aside className="hidden md:block w-64 bg-white border-r border-gray-100 shadow-xl flex-shrink-0 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto z-40">
-            <div className="p-4">
-                <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Menu</h2>
-                <nav className="space-y-1">
+        <aside className="hidden md:block w-64 bg-white border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.05)] flex-shrink-0 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto z-40 custom-scrollbar">
+            <div className="p-5 flex flex-col h-full">
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-2">Menu</h2>
+                <nav className="space-y-1.5 flex-1">
                     {links.map((link) => {
                         const isActive = pathname === link.href;
                         return (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${isActive
-                                    ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'
+                                className={`flex items-center gap-3.5 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 group ${isActive
+                                    ? 'bg-gradient-to-r from-teal-50 to-emerald-50 border-r-4 border-teal-500 text-teal-700 shadow-sm'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
-                                <span className={`text-lg ${isActive ? 'text-blue-700' : 'text-gray-500 group-hover:text-blue-700'}`}>{link.icon}</span>
+                                <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300 ${isActive ? 'bg-white text-teal-600 shadow-sm' : 'bg-transparent text-gray-400 group-hover:bg-white group-hover:text-gray-700 group-hover:shadow-sm'}`}>
+                                    <span className="text-lg">{link.icon}</span>
+                                </div>
                                 {link.name}
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="mt-8">
-                    <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Resources</h2>
-                    <div className="px-3 py-4 bg-blue-50 rounded-xl border border-blue-100">
-                        <p className="text-xs text-blue-800 mb-2 font-medium">✨ Go Premium</p>
-                        <p className="text-xs text-blue-600 mb-3 leading-relaxed">
-                            Unlock unlimited tests and detailed analytics.
-                        </p>
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-md shadow-blue-200">
-                            Upgrade Now
-                        </button>
+                <div className="mt-8 relative group cursor-pointer mb-4">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
+                    <div className="relative p-5 bg-gradient-to-br from-teal-600 to-emerald-700 rounded-2xl border border-teal-500/50 shadow-xl overflow-hidden">
+
+                        {/* Shimmer effect */}
+                        <div className="absolute inset-0 bg-white/20 w-1/2 h-full -skew-x-12 -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
+
+                        <div className="relative z-10">
+                            <h2 className="text-xs font-black text-teal-100 uppercase tracking-widest mb-1 shadow-sm">✨ Go Premium</h2>
+                            <p className="text-sm font-bold text-white mb-4 leading-tight">
+                                Unlock unlimited tests & analytics.
+                            </p>
+                            <button className="w-full bg-white hover:bg-gray-50 text-teal-700 text-xs font-extrabold py-2.5 rounded-xl transition-colors shadow-md shadow-black/10">
+                                Upgrade Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes shimmer {
+                    100% { transform: translateX(250%); }
+                }
+            `}} />
         </aside>
     );
 }
